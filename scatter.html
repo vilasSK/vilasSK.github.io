@@ -258,7 +258,8 @@
                     tooltip.style("opacity", 1)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY) + "px")
-                        .html("#cyl: " + d.EngineCylinders + " " + d.Make);
+                        .html("#cyl: " + d.EngineCylinders + " " + d.Make)
+                        .style("pointer-events", "none");
                 })
                 .on("mouseout", function () {
                     tooltip.style("opacity", 0)
