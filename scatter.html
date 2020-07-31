@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<select id="selectButton"></select>
+<style>
+    circle {
+        fill: lightblue;
+        stroke: black;
+    }
+
+    #tooltip {
+        opacity: 0;
+        position: absolute;
+        text-align: center;
+        width: 60px;
+        height: 40px;
+        background: lightblue;
+        border: 0px
+    }
+</style>
+
+<!-- Radio button: one choice only -->
+<br><br>
+
+<button id="buttonPrev">Prev</button>
+<button id="button1">1</button>
+<button id="button2">2</button>
+<button id="button3">3</button>
+<button id="buttonNext">Next</button>
+
+<!-- <div id="option">
+    <input name="updateButton" type="button" value="Update" onclick="buttonPressUpdate()" />
+    <input name="updateButton2" type="button" value="Update2" onclick="buttonPressUpdate()" />
+</div> -->
+
+
+<body onload='init()'>
+    <svg width=500 height=500> </svg>
+    <div id="tooltip"></div>
+    <script>
+        var data;
+
+        d3.select('#buttonPrev')
+            .on("click", buttonPrevPressUpdate);
+        d3.select('#button1')
+            .on("click", button1PressUpdate);
+        d3.select('#button2')
+            .on("click", button2PressUpdate);
+        d3.select('#button3')
+            .on("click", button3PressUpdate);
+        d3.select('#buttonNext')
+            .on("click", buttonNextPressUpdate);
+
+        async function init() {
+            data = await d3.csv('https://flunky.github.io/cars2017.csv');
+
+            //const data = await d3.csv("http://127.0.0.1:8000/cars2017.csv");
+            mainChart(data);
+            State = 1;
+            d3.select("#button1")
+                .style("background-color", "#ccc");
+            d3.select("#button2")
+                .style("background-color", "#FFF");
+            d3.select("#button3")
+                .style("background-color", "#FFF");
+
+        }
+        function buttonPrevPressUpdate() {
+            if (State > 1) {
+                State = State - 1;
+                buttonPressUpdate();
+            }
+
+        }
+        function button1PressUpdate() {
+            if (State != 1) {
+                State = 1;
+                buttonPressUpdate();
+            }
+
+        }
+        function button2PressUpdate() {
+            if (State != 2) {
+                State = 2;
+                buttonPressUpdate();
+            }
+
+        }
+        function button3PressUpdate() {
+            if (State != 3) {
+                State = 3;
+                buttonPressUpdate();
+            }
+
+        }
+        function buttonNextPressUpdate() {
+            if (State < 3) {
+                State = State + 1;
+                buttonPressUpdate();
+            }
+
+        }
+
+        function buttonPressUpdate() {
+            //State == 1 ? chart2() : mainChart(data);
+            switch (State) {
+                case 1:
+                    mainChart(data);
+                    d3.select("#button1")
+                        .style("background-color", "#ccc");
+                    d3.select("#button2")
+                        .style("background-color", "#FFF");
+                    d3.select("#button3")
+                        .style("background-color", "#FFF");
+                    break;
+                case 2:
+                    chart2();
+                    d3.select("#button1")
+                        .style("background-color", "#FFF");
+                    d3.select("#button2")
+                        .style("background-color", "#ccc");
+                    d3.select("#button3")
+                        .style("background-color", "#FFF");
+                    break;
+                case 3:
+                    chart3();
+                    d3.select("#button1")
+                        .style("background-color", "#FFF");
+                    d3.select("#button2")
+                        .style("background-color", "#FFF");
+                    d3.select("#button3")
+                        .style("background-color", "#ccc");
+                    break;
+            }
+        }
+        function chart2() {
+            //d3.selectAll("svg > *").remove();
+
+            d3.select("svg").selectAll("*").remove();
+
+        }
+        function chart3() {
+            //d3.selectAll("svg > *").remove();
+
+            d3.select("svg").selectAll("*").remove();
+
+        }
+        async function mainChart(data) {
+            State = 1;
+            var width = 400;
+            var height = 400;
+            var margin = 50;
+            var x = d3.scaleLog().domain([10, 150]).range([0, width]);
+            var y = d3.scaleLog().domain([10, 150]).range([height, 0]);
+            var border = 1;
+            var bordercolor = 'black';
+
+
+
+            function applyfilter(data, givenMake) {
+                return data.filter(function (d) { return d.Make == givenMake; });
+            }
+            // A function that update the chart
+            function update(selectedMake) {
+
+                //document.write("Make:"+selectedMake);
+                // Create new data with the selection?
+                var dataFilter = applyfilter(data, selectedMake);
+                // document.write(JSON.stringify(dataFilter));
+                // document.write("");
+                // document.write(JSON.stringify(data));
+                console.log(JSON.stringify(dataFilter));
+                // Give these new data to update line
+
+                plot
+                    //.selectAll("circle")
+                    .data(dataFilter)
+                    //.enter().append("circle")
+                    // .transition()
+                    // .duration(1000)
+                    .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
+                    .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
+                    .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+                    .exit().remove();
+            }
+
+            // var select = d3.select('body')
+            //     .append('div')
+            //     .append('select');
+
+
+
+            var borderPath = d3.select("svg").append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("height", 500)
+                .attr("width", 500)
+                .style("stroke", bordercolor)
+                .style("fill", "none")
+                .style("stroke-width", border);
+
+            d3.select("svg")
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + margin + ")")
+                .call(d3.axisLeft(y)
+                    .tickValues([10, 20, 50, 100])
+                    .tickFormat(d3.format("~s")));
+
+
+            d3.select("svg")
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + (height + margin) + ")")
+                .call(d3.axisBottom(x)
+                    .tickValues([10, 20, 50, 100])
+                    .tickFormat(d3.format("~s")));
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width + 2 * margin - 100)
+                .attr("y", height + 2 * margin - 10)
+                .text("Avg City mpg");
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "y label")
+                .attr("text-anchor", "end")
+                .attr("y", 5)
+                .attr("x", -100)
+                .attr("dy", "0.5em")
+                .attr("transform", "rotate(-90)")
+                .text("Avg Hwy mpg");
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "Heading")
+                .attr("text-anchor", "end")
+                .attr("x", width + 2 * margin - 200)
+                .attr("y", 20)
+                .text("Overview: Auto MPG profiles ");
+
+
+            var tooltip = d3.select("#tooltip");
+
+            var plot = d3.select("svg")
+                .attr("width", width + 2 * margin)
+                .attr("height", height + 2 * margin)
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + margin + ")")
+                .selectAll("circle")
+                .data(data)
+                .enter().append("circle")
+                .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
+                .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
+                .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+                .on("mouseover", function (d, i) {
+                    tooltip.style("opacity", 1)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY) + "px")
+                        .html("#cyl: " + d.EngineCylinders + " " + d.Make);
+                })
+                .on("mouseout", function () {
+                    tooltip.style("opacity", 0)
+                });
+
+            // var $makeSelector = document.querySelector('.make-select');
+            // var makeData = getFilteredData(data, $makeSelector.value);
+
+            var makesSet = d3.set(data.map(function (d) { return d.Make; })).values();
+            var makes = Array.from(makesSet);
+            // create group filtering select list
+            d3.select("#selectButton")
+                .selectAll('option')
+                .data(makes)
+                .enter()
+                .append('option')
+                .text(function (d) {
+                    return d
+                })
+                .attr("value", function (d) { return d; })
+                .style("left", "100px")
+                .style("top", "100px")
+
+                ;
+
+            d3.select("#selectButton")
+                .property("value", makes[1]); // default selected group
+
+            d3.select("#selectButton")
+                .on("change", function () {
+                    // get selected Make
+                    var carmake = d3.select(this).property("value");
+                    var a = 1;
+                    update(carmake);
+                })
+
+
+            // var annotation1 = d3.select("svg")
+            //     .append("rect")
+            //     .attr("x", 375)
+            //     .attr("y", 150)
+            //     .attr("height", 50)
+            //     .attr("width", 100)
+            //     .style("stroke", bordercolor)
+            //     .style("fill", "none")
+            //     .style("stroke-width", border);
+
+            d3.select("svg")
+                .append("text")
+                .style("opacity", 0)
+                .transition()
+                .duration(3000)
+                .style("opacity", 1)
+                .attr("color", "black")
+                .style("font-size", "14px")
+                .attr("dy", ".35em")
+                .attr("x", margin + 10)
+                .attr("y", height)
+                .style("style", "label")
+                .text("Gas Guzzlers");
+
+            d3.select("svg")
+                .append("text")
+                .style("opacity", 0)
+                .transition()
+                .duration(3000)
+                .style("opacity", 1)
+                .attr("color", "black")
+                .style("font-size", "14px")
+                .attr("dy", ".35em")
+                .attr("x", 380)
+                .attr("y", 155)
+                .style("style", "label")
+                .text("Most Efficient");
+
+
+            d3.select("svg")
+                .append("circle")
+                .attr("cx", width - 10)
+                .attr("cy", 10)
+                .attr("r", 10);
+
+            d3.select("svg")
+                .append("text")
+                .style("opacity", 0)
+                .transition()
+                .duration(3000)
+                .style("opacity", 1)
+                .attr("color", "black")
+                .style("font-size", "14px")
+                .attr("dy", ".35em")
+                .attr("x", width)
+                .attr("y", 10)
+                .style("style", "label")
+                .text("More cyclinders");
+
+
+
+            d3.select("svg")
+                .append("circle")
+                .attr("cx", width - 10)
+                .attr("cy", 30)
+                .attr("r", 5);
+
+            d3.select("svg")
+                .append("text")
+                .style("opacity", 0)
+                .transition()
+                .duration(3000)
+                .style("opacity", 1)
+                .attr("color", "black")
+                .style("font-size", "14px")
+                .attr("dy", ".35em")
+                .attr("x", width)
+                .attr("y", 30)
+                .style("style", "label")
+                .text("Less cyclinders");
+        }
+
+
+    </script>
+</body>
+
+</html>
