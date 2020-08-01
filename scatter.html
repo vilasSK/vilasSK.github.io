@@ -23,9 +23,9 @@
 <br><br>
 
 <button id="buttonPrev">Prev</button>
-<button id="button1">1</button>
-<button id="button2">2</button>
-<button id="button3">3</button>
+<button id="button1">OverView</button>
+<button id="button2">ByMake</button>
+<button id="button3">ByFuel</button>
 <button id="buttonNext">Next</button>
 
 <!-- <div id="option">
@@ -38,7 +38,7 @@
     <svg width=500 height=500> </svg>
     <div id="tooltip"></div>
     <script>
-        var data;
+        var fulldata;
 
         d3.select('#buttonPrev')
             .on("click", buttonPrevPressUpdate);
@@ -52,10 +52,11 @@
             .on("click", buttonNextPressUpdate);
 
         async function init() {
-            data = await d3.csv('https://flunky.github.io/cars2017.csv');
+            fulldata = await d3.csv('https://flunky.github.io/cars2017.csv');
 
             //const data = await d3.csv("http://127.0.0.1:8000/cars2017.csv");
-            mainChart(data);
+            
+            mainChart(fulldata);
             State = 1;
             d3.select("#button1")
                 .style("background-color", "#ccc");
@@ -105,7 +106,8 @@
             //State == 1 ? chart2() : mainChart(data);
             switch (State) {
                 case 1:
-                    mainChart(data);
+                    d3.selectAll("#selectButton").append("#selectButton");
+                    mainChart(fulldata);
                     d3.select("#button1")
                         .style("background-color", "#ccc");
                     d3.select("#button2")
@@ -135,7 +137,7 @@
         }
         function chart2() {
             //d3.selectAll("svg > *").remove();
-
+            d3.select("#selectButton").remove();
             d3.select("svg").selectAll("*").remove();
 
         }
@@ -165,23 +167,22 @@
 
                 //document.write("Make:"+selectedMake);
                 // Create new data with the selection?
-                var dataFilter = applyfilter(data, selectedMake);
-                // document.write(JSON.stringify(dataFilter));
-                // document.write("");
-                // document.write(JSON.stringify(data));
-                console.log(JSON.stringify(dataFilter));
+                var dataFilter = applyfilter(fulldata, selectedMake);
+                //console.log(JSON.stringify(dataFilter));
                 // Give these new data to update line
 
-                plot
-                    //.selectAll("circle")
-                    .data(dataFilter)
-                    //.enter().append("circle")
-                    // .transition()
-                    // .duration(1000)
-                    .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
-                    .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
-                    .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
-                    .exit().remove();
+                d3.select("svg").selectAll("*").remove();
+                mainChart(dataFilter);
+
+                // below does not work:
+                // plot
+                //     //.selectAll("circle")
+                //     .data(dataFilter)
+                //     //.enter().append("circle")
+                //     .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
+                //     .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
+                //     .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+                //     .exit().remove();
             }
 
             // var select = d3.select('body')
