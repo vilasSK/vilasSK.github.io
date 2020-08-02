@@ -56,6 +56,8 @@
             fulldata = await d3.csv('https://flunky.github.io/cars2017.csv');
 
             makesSet = d3.set(fulldata.map(function (d) { return d.Make; }));
+            originalmakesSet = makesSet;
+            originalmakes = Array.from(originalmakesSet.values());
             makesSet.add("ALL Makes");
             makes = Array.from(makesSet.values());
 
@@ -259,7 +261,7 @@
             //var x = d3.scaleBand().domain(makes).range([0, width]);
             var x = d3.scaleLog().domain([10, 150]).range([0, width]);
             //var y = d3.scaleLog().domain([10, 150]).range([height, 0]);
-            var y = d3.scaleBand().domain(makes).range([0, width]);
+            var y = d3.scaleBand().domain(originalmakes).range([0, width]);
             var border = 1;
             var bordercolor = 'black';
 
@@ -312,7 +314,7 @@
                 .attr("text-anchor", "end")
                 .attr("x", width + 2 * margin - 200)
                 .attr("y", 20)
-                .text("Overview: Auto MPG profiles ");
+                .text("MPG spectrum by Auto Make");
 
             var plot3 = d3.select("svg")
                 .attr("width", width + 2 * margin)
@@ -341,7 +343,8 @@
             d3.select("svg").selectAll("*").remove();
 
             function applyfilter(data, givenMake) {
-                return data.filter(function (d) { return d.Make == givenMake; });
+                return data.filter(function (d) { 
+                    return (givenMake == "ALL Makes" || d.Make == givenMake); });
             }
             // A function that update the chart
             function update(selectedMake) {
