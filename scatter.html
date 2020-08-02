@@ -24,8 +24,8 @@
 
 <button id="buttonPrev">Prev</button>
 <button id="button1">OverView</button>
-<button id="button2">ByMake</button>
-<button id="button3">ByFuel</button>
+<button id="button2">ByFuel</button>
+<button id="button3">ByMake</button>
 <button id="buttonNext">Next</button>
 
 <!-- <div id="option">
@@ -38,7 +38,7 @@
     <svg width=500 height=500> </svg>
     <div id="tooltip"></div>
     <script>
-        var fulldata;
+        var fulldata, makesSet, makes;
 
         d3.select('#buttonPrev')
             .on("click", buttonPrevPressUpdate);
@@ -54,8 +54,11 @@
         async function init() {
             fulldata = await d3.csv('https://flunky.github.io/cars2017.csv');
 
+            makesSet = d3.set(fulldata.map(function (d) { return d.Make; })).values();
+            makes = Array.from(makesSet);
+
             //const data = await d3.csv("http://127.0.0.1:8000/cars2017.csv");
-            
+
             mainChart(fulldata);
             State = 1;
             d3.select("#button1")
@@ -116,7 +119,7 @@
                         .style("background-color", "#FFF");
                     break;
                 case 2:
-                    chart2();
+                    ByFuelChart(fulldata);
                     d3.select("#button1")
                         .style("background-color", "#FFF");
                     d3.select("#button2")
@@ -125,7 +128,7 @@
                         .style("background-color", "#FFF");
                     break;
                 case 3:
-                    chart3();
+                    ByMakeChart(fulldata);
                     d3.select("#button1")
                         .style("background-color", "#FFF");
                     d3.select("#button2")
@@ -147,6 +150,174 @@
             d3.select("svg").selectAll("*").remove();
 
         }
+        async function ByFuelChart(fueldata) {
+
+            var width = 400;
+            var height = 400;
+            var margin = 50;
+
+            d3.select("#selectButton").remove();
+            d3.select("svg").selectAll("*").remove();
+
+
+            var fuels = ["Gasoline", "Diesel", "Electricity"];
+            //var x = d3.scaleBand().domain(["G","D","E"]).range([0, width]);
+            var x = d3.scaleBand().domain(fuels).range([0, width]);
+            //var x = d3.scaleLog().domain([10, 150]).range([0, width]);
+            var y = d3.scaleLog().domain([10, 150]).range([height, 0]);
+            var border = 1;
+            var bordercolor = 'black';
+
+            var borderPath = d3.select("svg").append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("height", 500)
+                .attr("width", 500)
+                .style("stroke", bordercolor)
+                .style("fill", "none")
+                .style("stroke-width", border);
+
+            d3.select("svg")
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + margin + ")")
+                .call(d3.axisLeft(y)
+                    //.tickValues([1,2,3])
+                    .tickValues([10, 20, 50, 100])
+                    .tickFormat(d3.format("~s")));
+
+
+            d3.select("svg")
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + (height + margin) + ")")
+                .call(d3.axisBottom(x));
+            //.tickValues([1,2,3])
+            //.tickValues([10, 20, 50, 100])
+            //.tickFormat(d3.format("~s")));
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width + 2 * margin - 100)
+                .attr("y", height + 2 * margin - 10)
+                .text("Avg City mpg");
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "y label")
+                .attr("text-anchor", "end")
+                .attr("y", 5)
+                .attr("x", -100)
+                .attr("dy", "0.5em")
+                .attr("transform", "rotate(-90)")
+                .text("Avg Hwy mpg");
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "Heading")
+                .attr("text-anchor", "end")
+                .attr("x", width + 2 * margin - 200)
+                .attr("y", 20)
+                .text("Auto MPG profiles By Fuel Type");
+
+            var plot2 = d3.select("svg")
+                .attr("width", width + 2 * margin)
+                .attr("height", height + 2 * margin)
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + margin + ")")
+                .selectAll("circle")
+                .data(fueldata)
+                .enter().append("circle")
+                .attr("cx", function(d, i) { return x(d.Fuel)+margin; })
+                .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
+                .attr("r", function (d, i) { return (+d.EngineCylinders + 2) });
+                // .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
+                // .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
+                // .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+
+        }
+        async function ByMakeChart(Makedata) {
+
+            var width = 400;
+            var height = 400;
+            var margin = 50;
+
+            d3.select("#selectButton").remove();
+            d3.select("svg").selectAll("*").remove();
+
+
+            //var x = d3.scaleBand().domain(["G","D","E"]).range([0, width]);
+            //var x = d3.scaleBand().domain(makes).range([0, width]);
+            var x = d3.scaleLog().domain([10, 150]).range([0, width]);
+            //var y = d3.scaleLog().domain([10, 150]).range([height, 0]);
+            var y = d3.scaleBand().domain(makes).range([0, width]);
+            var border = 1;
+            var bordercolor = 'black';
+
+            var borderPath = d3.select("svg").append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("height", 500)
+                .attr("width", 500)
+                .style("stroke", bordercolor)
+                .style("fill", "none")
+                .style("stroke-width", border);
+
+            d3.select("svg")
+                .append("g")
+                .attr("transform", "translate(" + 2*margin + "," + margin + ")")
+                .call(d3.axisLeft(y));
+                    //.tickValues([1,2,3])
+                    // .tickValues([10, 20, 50, 100])
+                    // .tickFormat(d3.format("~s")));
+
+
+            d3.select("svg")
+                .append("g")
+                .attr("transform", "translate(" + 2*margin + "," + (height + margin) + ")")
+                .call(d3.axisBottom(x)
+                    .tickValues([10, 20, 50, 100])
+                    .tickFormat(d3.format("~s")));
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width + 2 * margin - 100)
+                .attr("y", height + 2 * margin - 10)
+                .text("Avg City mpg");
+
+            // d3.select("svg")
+            //     .append("text")
+            //     .attr("class", "y label")
+            //     .attr("text-anchor", "end")
+            //     .attr("y", 5)
+            //     .attr("x", -100)
+            //     .attr("dy", "0.5em")
+            //     .attr("transform", "rotate(-90)")
+            //     .text("Avg Hwy mpg");
+
+            d3.select("svg")
+                .append("text")
+                .attr("class", "Heading")
+                .attr("text-anchor", "end")
+                .attr("x", width + 2 * margin - 200)
+                .attr("y", 20)
+                .text("Overview: Auto MPG profiles ");
+
+            var plot3 = d3.select("svg")
+                .attr("width", width + 2 * margin)
+                .attr("height", height + 2 * margin)
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + margin + ")")
+                .selectAll("circle")
+                .data(Makedata)
+                .enter().append("circle")
+                .attr("cx", function(d, i) { return x(d.AverageCityMPG)+margin; })
+                .attr("cy", function (d, i) { return y(d.Make); })
+                .attr("r", 2);
+        }
+
         async function mainChart(data) {
             State = 1;
             var width = 400;
@@ -157,7 +328,7 @@
             var border = 1;
             var bordercolor = 'black';
 
-
+            d3.select("svg").selectAll("*").remove();
 
             function applyfilter(data, givenMake) {
                 return data.filter(function (d) { return d.Make == givenMake; });
@@ -269,8 +440,7 @@
             // var $makeSelector = document.querySelector('.make-select');
             // var makeData = getFilteredData(data, $makeSelector.value);
 
-            var makesSet = d3.set(data.map(function (d) { return d.Make; })).values();
-            var makes = Array.from(makesSet);
+
             // create group filtering select list
             d3.select("#selectButton")
                 .selectAll('option')
