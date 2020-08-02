@@ -39,6 +39,7 @@
     <div id="tooltip"></div>
     <script>
         var fulldata, makesSet, makes;
+        var carindex, carmake;
 
         d3.select('#buttonPrev')
             .on("click", buttonPrevPressUpdate);
@@ -54,11 +55,16 @@
         async function init() {
             fulldata = await d3.csv('https://flunky.github.io/cars2017.csv');
 
-            makesSet = d3.set(fulldata.map(function (d) { return d.Make; })).values();
-            makes = Array.from(makesSet);
+            makesSet = d3.set(fulldata.map(function (d) { return d.Make; }));
+            makesSet.add("ALL Makes");
+            makes = Array.from(makesSet.values());
 
             //const data = await d3.csv("http://127.0.0.1:8000/cars2017.csv");
-
+            carindex = 44;
+            carmake = makes[carindex];
+            d3.select("#selectButton")
+                .property("index", carindex)
+                .property("value", makes[carindex]); // default selected group
             mainChart(fulldata);
             State = 1;
             d3.select("#button1")
@@ -110,6 +116,9 @@
             switch (State) {
                 case 1:
                     //d3.append("select").attr(id, "selectButton");
+                    d3.select("#selectButton")
+                        .property("index", carindex)
+                        .property("value", makes[carindex]); // default selected group
                     mainChart(fulldata);
                     d3.select("#button1")
                         .style("background-color", "#ccc");
@@ -201,7 +210,7 @@
                 .attr("text-anchor", "end")
                 .attr("x", width + 2 * margin - 100)
                 .attr("y", height + 2 * margin - 10)
-                .text("Avg City mpg");
+                .text("Fuel Type");
 
             d3.select("svg")
                 .append("text")
@@ -229,12 +238,12 @@
                 .selectAll("circle")
                 .data(fueldata)
                 .enter().append("circle")
-                .attr("cx", function(d, i) { return x(d.Fuel)+margin; })
+                .attr("cx", function (d, i) { return x(d.Fuel) + margin; })
                 .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
                 .attr("r", function (d, i) { return (+d.EngineCylinders + 2) });
-                // .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
-                // .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
-                // .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+            // .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
+            // .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
+            // .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
 
         }
         async function ByMakeChart(Makedata) {
@@ -267,16 +276,16 @@
 
             d3.select("svg")
                 .append("g")
-                .attr("transform", "translate(" + 2*margin + "," + margin + ")")
+                .attr("transform", "translate(" + 2 * margin + "," + margin + ")")
                 .call(d3.axisLeft(y));
-                    //.tickValues([1,2,3])
-                    // .tickValues([10, 20, 50, 100])
-                    // .tickFormat(d3.format("~s")));
+            //.tickValues([1,2,3])
+            // .tickValues([10, 20, 50, 100])
+            // .tickFormat(d3.format("~s")));
 
 
             d3.select("svg")
                 .append("g")
-                .attr("transform", "translate(" + 2*margin + "," + (height + margin) + ")")
+                .attr("transform", "translate(" + 2 * margin + "," + (height + margin) + ")")
                 .call(d3.axisBottom(x)
                     .tickValues([10, 20, 50, 100])
                     .tickFormat(d3.format("~s")));
@@ -315,7 +324,7 @@
                 .selectAll("circle")
                 .data(Makedata)
                 .enter().append("circle")
-                .attr("cx", function(d, i) { return x(d.AverageCityMPG)+margin; })
+                .attr("cx", function (d, i) { return x(d.AverageCityMPG) + margin; })
                 .attr("cy", function (d, i) { return y(d.Make); })
                 .attr("r", 2);
         }
@@ -459,15 +468,22 @@
 
                 ;
 
+            console.log("carindex,carmake:"+carindex+","+carmake)
+
             d3.select("#selectButton")
-                .property("value", makes[1]); // default selected group
+                .property("index", carindex)
+                .property("value", makes[carindex]); // default selected group
 
             d3.select("#selectButton")
                 .on("change", function () {
                     // get selected Make
-                    var carmake = d3.select(this).property("value");
-                    var a = 1;
+                    carmake = d3.select(this).property("value");
+                    carindex = d3.select(this).property("index");
+
                     update(carmake);
+                    d3.select(this)
+                        .property("index", carindex)
+                        .property("value", makes[carindex]);
                 })
 
 
