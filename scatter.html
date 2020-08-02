@@ -109,7 +109,7 @@
             //State == 1 ? chart2() : mainChart(data);
             switch (State) {
                 case 1:
-                    d3.selectAll("#selectButton").append("#selectButton");
+                    //d3.append("select").attr(id, "selectButton");
                     mainChart(fulldata);
                     d3.select("#button1")
                         .style("background-color", "#ccc");
@@ -140,7 +140,7 @@
         }
         function chart2() {
             //d3.selectAll("svg > *").remove();
-            d3.select("#selectButton").remove();
+            d3.select("#selectButton").attr("visibility", "hidden");
             d3.select("svg").selectAll("*").remove();
 
         }
@@ -156,7 +156,8 @@
             var height = 400;
             var margin = 50;
 
-            d3.select("#selectButton").remove();
+            //d3.select("#selectButton").remove();
+            d3.select("#selectButton").style("visibility", "hidden");
             d3.select("svg").selectAll("*").remove();
 
 
@@ -242,7 +243,8 @@
             var height = 400;
             var margin = 50;
 
-            d3.select("#selectButton").remove();
+            //d3.select("#selectButton").remove();
+            d3.select("#selectButton").style("visibility", "hidden");
             d3.select("svg").selectAll("*").remove();
 
 
@@ -328,6 +330,7 @@
             var border = 1;
             var bordercolor = 'black';
 
+            d3.select("#selectButton").style("visibility", "visible");
             d3.select("svg").selectAll("*").remove();
 
             function applyfilter(data, givenMake) {
