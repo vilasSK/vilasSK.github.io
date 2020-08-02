@@ -63,7 +63,6 @@
             carindex = 44;
             carmake = makes[carindex];
             d3.select("#selectButton")
-                .property("index", carindex)
                 .property("value", makes[carindex]); // default selected group
             mainChart(fulldata);
             State = 1;
@@ -117,7 +116,6 @@
                 case 1:
                     //d3.append("select").attr(id, "selectButton");
                     d3.select("#selectButton")
-                        .property("index", carindex)
                         .property("value", makes[carindex]); // default selected group
                     mainChart(fulldata);
                     d3.select("#button1")
@@ -468,22 +466,20 @@
 
                 ;
 
-            console.log("carindex,carmake:"+carindex+","+carmake)
+            //console.log("carindex,carmake:"+carindex+","+carmake)
 
             d3.select("#selectButton")
-                .property("index", carindex)
                 .property("value", makes[carindex]); // default selected group
 
             d3.select("#selectButton")
                 .on("change", function () {
                     // get selected Make
                     carmake = d3.select(this).property("value");
-                    carindex = d3.select(this).property("index");
+                    //carindex = d3.select(this).property("index");
 
                     update(carmake);
                     d3.select(this)
-                        .property("index", carindex)
-                        .property("value", makes[carindex]);
+                        .property("value", carmake);
                 })
 
 
