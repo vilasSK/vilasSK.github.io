@@ -123,22 +123,35 @@
             //State == 1 ? chart2() : mainChart(data);
             d3.select("#selectButton")
                 .property("value", makes[carindex]); // default selected group
-            
-            d3.select("#button1")
-                .style("background-color", "#ccc");
-            d3.select("#button2")
-                .style("background-color", "#FFF");
-            d3.select("#button3")
-                .style("background-color", "#FFF");
+
+
 
             switch (State) {
-                case 1:                    
-                    mainChart(fulldata);                    
+                case 1:
+                    d3.select("#button1")
+                        .style("background-color", "#ccc");
+                    d3.select("#button2")
+                        .style("background-color", "#FFF");
+                    d3.select("#button3")
+                        .style("background-color", "#FFF");
+                    mainChart(fulldata);
                     break;
-                case 2:                   
-                    ByFuelChart(fulldata);                    
+                case 2:
+                    d3.select("#button1")
+                        .style("background-color", "#FFF");
+                    d3.select("#button2")
+                        .style("background-color", "#ccc");
+                    d3.select("#button3")
+                        .style("background-color", "#FFF");
+                    ByFuelChart(fulldata);
                     break;
                 case 3:
+                    d3.select("#button1")
+                        .style("background-color", "#FFF");
+                    d3.select("#button2")
+                        .style("background-color", "#FFF");
+                    d3.select("#button3")
+                        .style("background-color", "#ccc");
                     ByMakeChart(fulldata);
                     break;
             }
