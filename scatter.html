@@ -238,6 +238,8 @@
                 .attr("y", 20)
                 .text("Auto MPG profiles By Fuel Type");
 
+            var tooltip = d3.select("#tooltip");
+
             var plot2 = d3.select("svg")
                 .attr("width", width + 2 * margin)
                 .attr("height", height + 2 * margin)
@@ -248,7 +250,17 @@
                 .enter().append("circle")
                 .attr("cx", function (d, i) { return x(d.Fuel) + margin; })
                 .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
-                .attr("r", function (d, i) { return (+d.EngineCylinders + 2) });
+                .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+                .on("mouseover", function (d, i) {
+                    tooltip.style("opacity", 1)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY) + "px")
+                        .html("#cyl: " + d.EngineCylinders + " " + d.Make)
+                        .style("pointer-events", "none");
+                })
+                .on("mouseout", function () {
+                    tooltip.style("opacity", 0)
+                });
 
 
             function applyfilter(data, givenMake) {
@@ -345,6 +357,8 @@
                 .attr("y", 20)
                 .text("MPG spectrum by Auto Make");
 
+            var tooltip = d3.select("#tooltip");
+
             var plot3 = d3.select("svg")
                 .attr("width", width + 2 * margin)
                 .attr("height", height + 2 * margin)
@@ -355,7 +369,17 @@
                 .enter().append("circle")
                 .attr("cx", function (d, i) { return x(d.AverageCityMPG) + margin; })
                 .attr("cy", function (d, i) { return y(d.Make); })
-                .attr("r", function (d, i) { return (+d.EngineCylinders + 2) });
+                .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+                .on("mouseover", function (d, i) {
+                    tooltip.style("opacity", 1)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY) + "px")
+                        .html("#cyl: " + d.EngineCylinders + " " + d.Make)
+                        .style("pointer-events", "none");
+                })
+                .on("mouseout", function () {
+                    tooltip.style("opacity", 0)
+                });
 
             function applyfilterByMake(data, givenMake) {
                 return data.filter(function (d) {
