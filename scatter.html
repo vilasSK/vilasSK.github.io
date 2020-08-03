@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html>
+<h1>The push to efficient cars</h1>
+<p>Car manufacturers are manufacturing a spectrum of cars running on different fuels
+    yielding wide range of mpg values.<br> Explore the below charts to find out more about
+    specific make.<br> Choose make from dropdown (below these lines),<br>
+    hover on the chart circles,<br>
+    navigate scenes using the buttons at the bottom left.
+</p>
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <select id="selectButton"></select>
 <style>
@@ -114,36 +121,25 @@
 
         function buttonPressUpdate() {
             //State == 1 ? chart2() : mainChart(data);
+            d3.select("#selectButton")
+                .property("value", makes[carindex]); // default selected group
+            
+            d3.select("#button1")
+                .style("background-color", "#ccc");
+            d3.select("#button2")
+                .style("background-color", "#FFF");
+            d3.select("#button3")
+                .style("background-color", "#FFF");
+
             switch (State) {
-                case 1:
-                    //d3.append("select").attr(id, "selectButton");
-                    d3.select("#selectButton")
-                        .property("value", makes[carindex]); // default selected group
-                    mainChart(fulldata);
-                    d3.select("#button1")
-                        .style("background-color", "#ccc");
-                    d3.select("#button2")
-                        .style("background-color", "#FFF");
-                    d3.select("#button3")
-                        .style("background-color", "#FFF");
+                case 1:                    
+                    mainChart(fulldata);                    
                     break;
-                case 2:
-                    ByFuelChart(fulldata);
-                    d3.select("#button1")
-                        .style("background-color", "#FFF");
-                    d3.select("#button2")
-                        .style("background-color", "#ccc");
-                    d3.select("#button3")
-                        .style("background-color", "#FFF");
+                case 2:                   
+                    ByFuelChart(fulldata);                    
                     break;
                 case 3:
                     ByMakeChart(fulldata);
-                    d3.select("#button1")
-                        .style("background-color", "#FFF");
-                    d3.select("#button2")
-                        .style("background-color", "#FFF");
-                    d3.select("#button3")
-                        .style("background-color", "#ccc");
                     break;
             }
         }
@@ -166,7 +162,8 @@
             var margin = 50;
 
             //d3.select("#selectButton").remove();
-            d3.select("#selectButton").style("visibility", "hidden");
+            //d3.select("#selectButton").style("visibility", "hidden");
+            d3.select("#selectButton").style("visibility", "visible");
             d3.select("svg").selectAll("*").remove();
 
 
@@ -200,9 +197,7 @@
                 .append("g")
                 .attr("transform", "translate(" + margin + "," + (height + margin) + ")")
                 .call(d3.axisBottom(x));
-            //.tickValues([1,2,3])
-            //.tickValues([10, 20, 50, 100])
-            //.tickFormat(d3.format("~s")));
+
 
             d3.select("svg")
                 .append("text")
@@ -241,9 +236,45 @@
                 .attr("cx", function (d, i) { return x(d.Fuel) + margin; })
                 .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
                 .attr("r", function (d, i) { return (+d.EngineCylinders + 2) });
-            // .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
-            // .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
-            // .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+
+
+            function applyfilter(data, givenMake) {
+                return data.filter(function (d) {
+                    return (givenMake == "ALL Makes" || d.Make == givenMake);
+                });
+            }
+            // A function that update the chart
+            function updateByFuel(selectedMake) {
+
+                // Create new data with the selection?
+                var dataFilter = applyfilter(fulldata, selectedMake);
+                //console.log(JSON.stringify(dataFilter));
+                // Give these new data to update line
+
+                d3.select("svg").selectAll("*").remove();
+                ByFuelChart(dataFilter);
+
+                // below does not work:
+                // plot
+                //     //.selectAll("circle")
+                //     .data(dataFilter)
+                //     //.enter().append("circle")
+                //     .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
+                //     .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
+                //     .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
+                //     .exit().remove();
+            }
+
+            d3.select("#selectButton")
+                .on("change", function () {
+                    // get selected Make
+                    carmake = d3.select(this).property("value");
+                    //carindex = d3.select(this).property("index");
+
+                    updateByFuel(carmake);
+                    d3.select(this)
+                        .property("value", carmake);
+                })
 
         }
         async function ByMakeChart(Makedata) {
@@ -253,14 +284,12 @@
             var margin = 50;
 
             //d3.select("#selectButton").remove();
-            d3.select("#selectButton").style("visibility", "hidden");
+            d3.select("#selectButton").style("visibility", "visible");
             d3.select("svg").selectAll("*").remove();
 
 
-            //var x = d3.scaleBand().domain(["G","D","E"]).range([0, width]);
-            //var x = d3.scaleBand().domain(makes).range([0, width]);
+
             var x = d3.scaleLog().domain([10, 150]).range([0, width]);
-            //var y = d3.scaleLog().domain([10, 150]).range([height, 0]);
             var y = d3.scaleBand().domain(originalmakes).range([0, width]);
             var border = 1;
             var bordercolor = 'black';
@@ -278,9 +307,6 @@
                 .append("g")
                 .attr("transform", "translate(" + 2 * margin + "," + margin + ")")
                 .call(d3.axisLeft(y));
-            //.tickValues([1,2,3])
-            // .tickValues([10, 20, 50, 100])
-            // .tickFormat(d3.format("~s")));
 
 
             d3.select("svg")
@@ -297,16 +323,6 @@
                 .attr("x", width + 2 * margin - 100)
                 .attr("y", height + 2 * margin - 10)
                 .text("Avg City mpg");
-
-            // d3.select("svg")
-            //     .append("text")
-            //     .attr("class", "y label")
-            //     .attr("text-anchor", "end")
-            //     .attr("y", 5)
-            //     .attr("x", -100)
-            //     .attr("dy", "0.5em")
-            //     .attr("transform", "rotate(-90)")
-            //     .text("Avg Hwy mpg");
 
             d3.select("svg")
                 .append("text")
@@ -326,7 +342,39 @@
                 .enter().append("circle")
                 .attr("cx", function (d, i) { return x(d.AverageCityMPG) + margin; })
                 .attr("cy", function (d, i) { return y(d.Make); })
-                .attr("r", 2);
+                .attr("r", 4);
+
+            function applyfilterByMake(data, givenMake) {
+                return data.filter(function (d) {
+                    return (givenMake == "ALL Makes" || d.Make == givenMake);
+                });
+            }
+            // A function that update the chart
+            function updateByMake(selectedMake) {
+
+                //document.write("Make:"+selectedMake);
+                // Create new data with the selection?
+                var dataFilter = applyfilterByMake(fulldata, selectedMake);
+                //console.log(JSON.stringify(dataFilter));
+                // Give these new data to update line
+
+                d3.select("svg").selectAll("*").remove();
+                ByMakeChart(dataFilter);
+
+
+            }
+
+            d3.select("#selectButton")
+                .on("change", function () {
+                    // get selected Make
+                    carmake = d3.select(this).property("value");
+                    //carindex = d3.select(this).property("index");
+
+                    updateByMake(carmake);
+                    d3.select(this)
+                        .property("value", carmake);
+                })
+
         }
 
         async function mainChart(data) {
@@ -343,8 +391,9 @@
             d3.select("svg").selectAll("*").remove();
 
             function applyfilter(data, givenMake) {
-                return data.filter(function (d) { 
-                    return (givenMake == "ALL Makes" || d.Make == givenMake); });
+                return data.filter(function (d) {
+                    return (givenMake == "ALL Makes" || d.Make == givenMake);
+                });
             }
             // A function that update the chart
             function update(selectedMake) {
@@ -358,20 +407,7 @@
                 d3.select("svg").selectAll("*").remove();
                 mainChart(dataFilter);
 
-                // below does not work:
-                // plot
-                //     //.selectAll("circle")
-                //     .data(dataFilter)
-                //     //.enter().append("circle")
-                //     .attr("cx", function (d, i) { return x(d.AverageCityMPG); })
-                //     .attr("cy", function (d, i) { return y(d.AverageHighwayMPG); })
-                //     .attr("r", function (d, i) { return (+d.EngineCylinders + 2) })
-                //     .exit().remove();
             }
-
-            // var select = d3.select('body')
-            //     .append('div')
-            //     .append('select');
 
 
 
