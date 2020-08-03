@@ -355,7 +355,7 @@
                 .enter().append("circle")
                 .attr("cx", function (d, i) { return x(d.AverageCityMPG) + margin; })
                 .attr("cy", function (d, i) { return y(d.Make); })
-                .attr("r", 4);
+                .attr("r", function (d, i) { return (+d.EngineCylinders + 2) });
 
             function applyfilterByMake(data, givenMake) {
                 return data.filter(function (d) {
